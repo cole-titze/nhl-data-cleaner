@@ -6,39 +6,31 @@ namespace BusinessLogic.Mappers
 	public static class MapGameToDbCleanedGame
 	{
         private const int RECENT_GAMES = 5;
-        private const int GAMES_TO_EXCLUDE = 15;
+        private const int EARLY_SEASON_GAME_COUNT = 15;
 
         public static DbCleanedGame Map(Game game, List<Game> seasonGames, List<Game> lastSeasonGames)
 		{
             var homeGames = GetTeamGames(seasonGames, game.homeTeamId, game.gameDate);
             var awayGames = GetTeamGames(seasonGames, game.awayTeamId, game.gameDate);
-            bool isExcluded = false;
             List<Game> lastSeasonHomeGames;
             List<Game> lastSeasonAwayGames;
             var homeHoursBetweenGames = GetHoursBetweenLastTwoGames(homeGames);
             var awayHoursBetweenGames = GetHoursBetweenLastTwoGames(awayGames);
 
-
-            if (homeGames.Count() < GAMES_TO_EXCLUDE)
+            if (homeGames.Count() < EARLY_SEASON_GAME_COUNT)
             {
                 lastSeasonHomeGames = GetTeamGames(lastSeasonGames, game.homeTeamId, game.gameDate);
                 homeGames = lastSeasonHomeGames.Concat(homeGames).ToList();
-                isExcluded = true;
             }
-            if (awayGames.Count() < GAMES_TO_EXCLUDE)
+            if (awayGames.Count() < EARLY_SEASON_GAME_COUNT)
             {
                 lastSeasonAwayGames = GetTeamGames(lastSeasonGames, game.awayTeamId, game.gameDate);
                 awayGames = lastSeasonAwayGames.Concat(awayGames).ToList();
-                isExcluded = true;
             }
 
             var cleanedGame = new DbCleanedGame()
             {
                 id = game.id,
-                homeTeamId = game.homeTeamId,
-                awayTeamId = game.awayTeamId,
-                seasonStartYear = game.seasonStartYear,
-                gameDate = game.gameDate,
 
                 homeWinRatio = GetWinRatioOfRecentGames(homeGames, game.homeTeamId, homeGames.Count()),
                 homeRecentWinRatio = GetWinRatioOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
@@ -84,10 +76,6 @@ namespace BusinessLogic.Mappers
                 awayRosterDefenseValue = GetRosterPlayersValue(game.teamRosters.awayDefensePlayers),
                 awayRosterOffenseValue = GetRosterPlayersValue(game.teamRosters.awayOffensePlayers),
                 awayRosterGoalieValue = GetRosterPlayersValue(game.teamRosters.awayGoalies),
-
-                winner = game.winner,
-                isExcluded = isExcluded,
-                hasBeenPlayed = game.hasBeenPlayed,
             };
             return cleanedGame;
         }

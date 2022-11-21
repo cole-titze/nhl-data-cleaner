@@ -1,13 +1,11 @@
-﻿namespace Entities.DbModels
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Entities.DbModels
 {
     // Recent means within last few games ex. 5 games (decided in appsettings)
     public class DbCleanedGame
     {
         public int id { get; set; }
-        public int homeTeamId { get; set; }
-        public int awayTeamId { get; set; }
-        public int seasonStartYear { get; set; }
-        public DateTime gameDate { get; set; }
         public double homeWinRatio { get; set; }
         public double homeRecentWinRatio { get; set; }
         public double homeRecentGoalsAvg { get; set; }
@@ -50,8 +48,8 @@
         public double awayRosterDefenseValue { get; set; }
         public double awayRosterGoalieValue { get; set; }
         public double awayHoursSinceLastGame { get; set; }
-        public int winner { get; set; }
-        public bool isExcluded { get; set; }
-        public bool hasBeenPlayed { get; set; }
+
+        [ForeignKey("id")]
+        public DbGame game { get; set; } = new DbGame();
     }
 }

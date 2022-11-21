@@ -14,12 +14,15 @@ namespace DataAccess.PlayerRepository
 
         public async Task<GameRoster> GetGameRoster(Game game)
         {
-            DbPlayer playerValue;
+            DbPlayer? playerValue;
             var roster = new GameRoster();
             var players = await _dbContext.GamePlayer.Where(x => x.gameId == game.id).ToListAsync();
             foreach(var player in players)
             {
-                playerValue = _dbContext.PlayerValue.Where(x => x.seasonStartYear == game.seasonStartYear && x.id == player.playerId).First();
+                playerValue = _dbContext.PlayerValue.Where(x => x.seasonStartYear == game.seasonStartYear && x.id == player.playerId).FirstOrDefault();
+                if (playerValue == null)
+                    continue;
+
                 if(player.teamId == game.homeTeamId)
                 {
                     if (playerValue.position == "D")

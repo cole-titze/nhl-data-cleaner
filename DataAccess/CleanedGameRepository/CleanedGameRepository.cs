@@ -18,7 +18,7 @@ namespace DataAccess.CleanedGameRepository
 
         public async Task<IEnumerable<DbCleanedGame>> GetSeasonGames(int seasonStartYear)
         {
-            return await _dbContext.CleanedGame.Where(x => x.seasonStartYear == seasonStartYear).ToListAsync();
+            return await _dbContext.CleanedGame.Include(x => x.game).Where(x => x.game.seasonStartYear == seasonStartYear).ToListAsync();
         }
     }
 }

@@ -91,7 +91,16 @@ namespace BusinessLogic.GameCleaner
 
         private IEnumerable<Game> GetNewGames(IEnumerable<DbCleanedGame> cleanedGames, IEnumerable<Game> games)
         {
-            throw new NotImplementedException();
+            var newGames = new List<Game>();
+            cleanedGames = cleanedGames.ToList();
+
+            foreach(var game in games)
+            {
+                if (cleanedGames.Any(x => x.id == game.id))
+                    continue;
+            }
+
+            return newGames;
         }
 
         private IEnumerable<Game> GetFutureGames(IEnumerable<Game> games)
