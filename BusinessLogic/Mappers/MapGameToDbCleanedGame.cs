@@ -30,7 +30,7 @@ namespace BusinessLogic.Mappers
 
             var cleanedGame = new DbCleanedGame()
             {
-                id = game.id,
+                gameId = game.id,
 
                 homeWinRatio = GetWinRatioOfRecentGames(homeGames, game.homeTeamId, homeGames.Count()),
                 homeRecentWinRatio = GetWinRatioOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),

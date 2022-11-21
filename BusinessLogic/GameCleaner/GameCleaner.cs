@@ -96,8 +96,9 @@ namespace BusinessLogic.GameCleaner
 
             foreach(var game in games)
             {
-                if (cleanedGames.Any(x => x.id == game.id))
+                if (cleanedGames.Any(x => x.gameId == game.id))
                     continue;
+                newGames.Add(game);
             }
 
             return newGames;
