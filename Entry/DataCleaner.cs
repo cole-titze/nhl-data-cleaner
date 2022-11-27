@@ -25,6 +25,7 @@ namespace Entry
         /// <returns>None</returns>
         public async Task Main(string gamesConnectionString)
         {
+            var watch = Stopwatch.StartNew();
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
 
             var nhlDbContext = new NhlDbContext(gamesConnectionString);
@@ -36,7 +37,11 @@ namespace Entry
             _logger.LogTrace("Starting Game Cleaning");
             var gameCleaner = new GameCleaner(gameRepo, cleanedGameRepo, playerRepo, _logger);
             await gameCleaner.CleanGamesInSeasons(yearRange);
-            _logger.LogTrace("Completed Game Cleaning");
+
+            watch.Stop();
+            var elapsedTime = watch.Elapsed;
+            var minutes = elapsedTime.TotalMinutes.ToString();
+            _logger.LogTrace("Completed Game Cleaner in " + minutes + " minutes");
         }
     }
 }

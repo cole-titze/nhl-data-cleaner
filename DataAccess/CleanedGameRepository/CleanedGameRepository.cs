@@ -13,12 +13,16 @@ namespace DataAccess.CleanedGameRepository
 
         public async Task AddCleanedGames(IEnumerable<DbCleanedGame> cleanedGames)
         {
+            foreach(var game in cleanedGames)
+            {
+                game.game = null;
+            }
             await _dbContext.CleanedGame.AddRangeAsync(cleanedGames);
         }
 
         public async Task<IEnumerable<DbCleanedGame>> GetSeasonGames(int seasonStartYear)
         {
-            return await _dbContext.CleanedGame.Include(x => x.game).Where(x => x.game.seasonStartYear == seasonStartYear).ToListAsync();
+            return await _dbContext.CleanedGame.Include(x => x.game).Where(x => x.game!.seasonStartYear == seasonStartYear).ToListAsync();
         }
     }
 }

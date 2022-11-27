@@ -52,6 +52,6 @@ namespace Entities.DbModels
         public double awayHoursSinceLastGame { get; set; }
 
         [ForeignKey("gameId")]
-        public DbGame game { get; set; } = new DbGame();
+        public DbGame? game { get; set; } = new DbGame();
     }
 }

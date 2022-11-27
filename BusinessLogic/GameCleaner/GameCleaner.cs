@@ -26,7 +26,6 @@ namespace BusinessLogic.GameCleaner
 		{
             for (int seasonStartYear = seasonYearRange.StartYear; seasonStartYear <= seasonYearRange.EndYear; seasonStartYear++)
             {
-                // Add future games to nhl-data-getter
                 // Add games to Predicted Game?
 
                 var games = await _gameRepo.GetSeasonGames(seasonStartYear);
@@ -44,7 +43,7 @@ namespace BusinessLogic.GameCleaner
                 var cleanedGames = await CleanGames(gamesToClean);
 
                 await _cleanedGameRepo.AddCleanedGames(cleanedGames);
-                _logger.LogInformation("Number of Games Added To Season" + seasonStartYear.ToString() + ": " + cleanedGames.Count().ToString());
+                _logger.LogInformation("Number of Games Added To Season " + seasonStartYear.ToString() + ": " + cleanedGames.Count().ToString());
             }
         }
 
