@@ -112,8 +112,8 @@ namespace BusinessLogic.Mappers
 
         private static bool isWin(Game game, int teamId)
         {
-            if (game.homeTeamId == teamId && game.winner == 0) return true;
-            if (game.awayTeamId == teamId && game.winner == 1) return true;
+            if (game.homeTeamId == teamId && game.winner == Winner.HOME) return true;
+            if (game.awayTeamId == teamId && game.winner == Winner.AWAY) return true;
             return false;
         }
 

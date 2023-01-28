@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 
 namespace Entities.DbModels
 {
@@ -53,5 +54,52 @@ namespace Entities.DbModels
 
         [ForeignKey("gameId")]
         public DbGame? game { get; set; } = new DbGame();
+
+        public void Clone(DbCleanedGame game)
+        {
+            gameId = game.gameId;
+            homeWinRatio = game.homeWinRatio;
+            homeRecentWinRatio = game.homeRecentWinRatio;
+            homeRecentGoalsAvg = game.homeRecentGoalsAvg;
+            homeRecentConcededGoalsAvg = game.homeRecentConcededGoalsAvg;
+            homeRecentSogAvg = game.homeRecentSogAvg;
+            homeRecentPpgAvg = game.homeRecentPpgAvg;
+            homeRecentHitsAvg = game.homeRecentHitsAvg;
+            homeRecentPimAvg = game.homeRecentPimAvg;
+            homeRecentBlockedShotsAvg = game.homeRecentBlockedShotsAvg;
+            homeRecentTakeawaysAvg = game.homeRecentTakeawaysAvg;
+            homeRecentGiveawaysAvg = game.homeRecentGiveawaysAvg;
+            homeGoalsAvg = game.homeGoalsAvg;
+            homeGoalsAvgAtHome = game.homeGoalsAvgAtHome;
+            homeRecentGoalsAvgAtHome = game.homeRecentGoalsAvgAtHome;
+            homeConcededGoalsAvg = game.homeConcededGoalsAvg;
+            homeConcededGoalsAvgAtHome = game.homeConcededGoalsAvgAtHome;
+            homeRecentConcededGoalsAvgAtHome = game.homeRecentConcededGoalsAvgAtHome;
+            homeHoursSinceLastGame = game.homeHoursSinceLastGame;
+            awayWinRatio = game.awayWinRatio;
+            awayRecentWinRatio = game.awayRecentWinRatio;
+            awayRecentGoalsAvg = game.awayRecentGoalsAvg;
+            awayRecentConcededGoalsAvg = game.awayRecentConcededGoalsAvg;
+            awayRecentSogAvg = game.awayRecentSogAvg;
+            awayRecentPpgAvg = game.awayRecentPpgAvg;
+            awayRecentHitsAvg = game.awayRecentHitsAvg;
+            awayRecentPimAvg = game.awayRecentPimAvg;
+            awayRecentBlockedShotsAvg = game.awayRecentBlockedShotsAvg;
+            awayRecentTakeawaysAvg = game.awayRecentTakeawaysAvg;
+            awayRecentGiveawaysAvg = game.awayRecentGiveawaysAvg;
+            awayGoalsAvg = game.awayGoalsAvg;
+            awayGoalsAvgAtAway = game.awayGoalsAvgAtAway;
+            awayRecentGoalsAvgAtAway = game.awayRecentGoalsAvgAtAway;
+            awayConcededGoalsAvg = game.awayConcededGoalsAvg;
+            awayConcededGoalsAvgAtAway = game.awayConcededGoalsAvgAtAway;
+            awayRecentConcededGoalsAvgAtAway = game.awayRecentConcededGoalsAvgAtAway;
+            homeRosterOffenseValue = game.homeRosterOffenseValue;
+            homeRosterDefenseValue = game.homeRosterDefenseValue;
+            homeRosterGoalieValue = game.homeRosterGoalieValue;
+            awayRosterOffenseValue = game.awayRosterOffenseValue;
+            awayRosterDefenseValue = game.awayRosterDefenseValue;
+            awayRosterGoalieValue = game.awayRosterGoalieValue;
+            awayHoursSinceLastGame = game.awayHoursSinceLastGame;
+        }
     }
 }

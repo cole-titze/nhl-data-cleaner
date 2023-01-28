@@ -29,7 +29,6 @@ namespace BusinessLogic.GameCleaner
                 // Add games to Predicted Game?
 
                 var games = await _gameRepo.GetSeasonGames(seasonStartYear);
-                games = await BuildRosters(games);
                 var existingCleanedGames = await _cleanedGameRepo.GetSeasonGames(seasonStartYear);
 
                 var gamesToClean = GetGamesToClean(existingCleanedGames, games);
@@ -39,10 +38,11 @@ namespace BusinessLogic.GameCleaner
                     _logger.LogInformation("All game data for season " + seasonStartYear.ToString() + " already exists. Skipping...");
                     continue;
                 }
-
+                gamesToClean = await BuildRosters(gamesToClean);
                 var cleanedGames = await CleanGames(gamesToClean);
 
-                await _cleanedGameRepo.AddCleanedGames(cleanedGames);
+                await _cleanedGameRepo.AddUpdateCleanedGames(cleanedGames);
+                await _cleanedGameRepo.Commit();
                 _logger.LogInformation("Number of Games Added To Season " + seasonStartYear.ToString() + ": " + cleanedGames.Count().ToString());
             }
         }
