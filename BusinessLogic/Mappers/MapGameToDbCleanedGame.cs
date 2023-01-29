@@ -7,7 +7,13 @@ namespace BusinessLogic.Mappers
 	{
         private const int RECENT_GAMES = 5;
         private const int EARLY_SEASON_GAME_COUNT = 15;
-
+        /// <summary>
+        /// Converts a raw game into a cleaned, ML ready, game. Uses previous games for certain features.
+        /// </summary>
+        /// <param name="game">Game to clean</param>
+        /// <param name="seasonGames">Games from the current season</param>
+        /// <param name="lastSeasonGames">Games from the previous season</param>
+        /// <returns>A cleaned game</returns>
         public static DbCleanedGame Map(Game game, List<Game> seasonGames, List<Game> lastSeasonGames)
 		{
             var homeGames = GetTeamGames(seasonGames, game.homeTeamId, game.gameDate);
@@ -79,7 +85,11 @@ namespace BusinessLogic.Mappers
             };
             return cleanedGame;
         }
-
+        /// <summary>
+        /// Given a list of players, returns a total value of the players
+        /// </summary>
+        /// <param name="players">List of players</param>
+        /// <returns>Value score of the players</returns>
         private static double GetRosterPlayersValue(List<DbPlayer> players)
         {
             double skillScore = 0;
@@ -93,6 +103,13 @@ namespace BusinessLogic.Mappers
 
         // If no game has been played set default as 4 days of rest (season hasn't started)
         public static readonly int DEFAULT_HOURS = 100;
+        /// <summary>
+        /// Gets the win ratio of the last games specified by numberOfGames
+        /// </summary>
+        /// <param name="teamSeasonGames">Games a team has played, sorted by recency</param>
+        /// <param name="teamId"></param>
+        /// <param name="numberOfGames"></param>
+        /// <returns></returns>
         public static double GetWinRatioOfRecentGames(List<Game> teamSeasonGames, int teamId, int numberOfGames)
         {
             double winRatio = 0;
