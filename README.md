@@ -6,7 +6,6 @@
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/cole-titze/nhl-data-cleaner/docker-publish.yml?label=Docker%20Publish)
 \
 ![cod cov](https://nhlblobstorage.blob.core.windows.net/repobadges/nhlDataCleanerBusinessLogicBadge.svg)
-![cod cov](https://nhlblobstorage.blob.core.windows.net/repobadges/nhlDataCleanerServicesBadge.svg)
 ![cod cov](https://nhlblobstorage.blob.core.windows.net/repobadges/nhlDataCleanerEntitiesBadge.svg)
 \
 ![cod cov](https://nhlblobstorage.blob.core.windows.net/repobadges/nhlDataCleanerEntryBadge.svg)
