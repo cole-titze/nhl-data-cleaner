@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging.Console;
 using Microsoft.Extensions.Logging;
 using Entry;
 
@@ -11,7 +10,7 @@ ServiceProvider serviceProvider = new ServiceCollection()
         )
     .BuildServiceProvider();
 
-var logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger<Program>();
+var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
 string? gamesConnectionString = Environment.GetEnvironmentVariable("NHL_DATABASE");
 
@@ -23,5 +22,5 @@ if (gamesConnectionString == null)
 if (gamesConnectionString == null)
     throw new Exception("Connection String Null");
 
-var dataGetter = new DataCleaner(logger);
+var dataGetter = new DataCleaner(loggerFactory);
 await dataGetter.Main(gamesConnectionString);

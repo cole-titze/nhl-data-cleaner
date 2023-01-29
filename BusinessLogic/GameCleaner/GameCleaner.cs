@@ -14,13 +14,13 @@ namespace BusinessLogic.GameCleaner
         private readonly IGameRepository _gameRepo;
         private readonly ICleanedGameRepository _cleanedGameRepo;
         private readonly IPlayerRepository _playerRepo;
-        private readonly ILogger _logger;
-        public GameCleaner(IGameRepository gameRepository, ICleanedGameRepository cleanedGameRepository, IPlayerRepository playerRepo, ILogger logger)
+        private readonly ILogger<GameCleaner> _logger;
+        public GameCleaner(IGameRepository gameRepository, ICleanedGameRepository cleanedGameRepository, IPlayerRepository playerRepo, ILoggerFactory loggerFactory)
         {
             _gameRepo = gameRepository;
             _cleanedGameRepo = cleanedGameRepository;
             _playerRepo = playerRepo;
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<GameCleaner>();
         }
         public async Task CleanGamesInSeasons(YearRange seasonYearRange)
 		{

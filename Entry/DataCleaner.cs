@@ -12,11 +12,13 @@ namespace Entry
     public class DataCleaner
     {
         private const int START_YEAR = 2010;
-        private readonly ILogger _logger;
+        private readonly ILogger<DataCleaner> _logger;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public DataCleaner(ILogger logger)
+        public DataCleaner(ILoggerFactory loggerFactory)
         {
-            _logger = logger;
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<DataCleaner>();
         }
         /// <summary>
         /// Gets and cleans all new games and player values. Stores CleanedGames in db.
@@ -35,7 +37,7 @@ namespace Entry
             var yearRange = new YearRange(START_YEAR, DateTime.Now);
 
             _logger.LogTrace("Starting Game Cleaning");
-            var gameCleaner = new GameCleaner(gameRepo, cleanedGameRepo, playerRepo, _logger);
+            var gameCleaner = new GameCleaner(gameRepo, cleanedGameRepo, playerRepo, _loggerFactory);
             await gameCleaner.CleanGamesInSeasons(yearRange);
 
             watch.Stop();
