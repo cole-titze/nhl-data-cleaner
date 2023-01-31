@@ -75,13 +75,12 @@ namespace BusinessLogic.GameCleaner
             int seasonStartYear = gamesToClean.First().seasonStartYear;
             var seasonGames = await _gameRepo.GetSeasonGames(seasonStartYear);
             var lastSeasonGames = await _gameRepo.GetSeasonGames(seasonStartYear - 1);
-            seasonGames = seasonGames.OrderBy(i => i.gameDate).Reverse().ToList();
-            lastSeasonGames = lastSeasonGames.OrderBy(i => i.gameDate).Reverse().ToList();
+            var gameMap = new SeasonGames(seasonGames.Concat(lastSeasonGames));
 
             var cleanedGames = new List<DbCleanedGame>();
             foreach(var game in gamesToClean)
             {
-                cleanedGames.Add(MapGameToDbCleanedGame.Map(game, seasonGames.ToList(), lastSeasonGames.ToList()));
+                cleanedGames.Add(MapGameToDbCleanedGame.Map(game, gameMap));
             }
             return cleanedGames;
         }
