@@ -7,101 +7,93 @@ namespace BusinessLogic.Mappers
 	{
         private const int RECENT_GAMES = 5;
         private const int EARLY_SEASON_GAME_COUNT = 15;
-
-        public static DbCleanedGame Map(Game game, List<Game> seasonGames, List<Game> lastSeasonGames)
+        /// <summary>
+        /// Converts a raw game into a cleaned, ML ready, game. Uses previous games for certain features.
+        /// </summary>
+        /// <param name="game">Game to clean</param>
+        /// <param name="seasonGames">Dictionary of team ids and Team games</param>
+        /// <returns>A cleaned game</returns>
+        public static DbCleanedGame Map(Game game, SeasonGames seasonGames)
 		{
-            var homeGames = GetTeamGames(seasonGames, game.homeTeamId, game.gameDate);
-            var awayGames = GetTeamGames(seasonGames, game.awayTeamId, game.gameDate);
-            List<Game> lastSeasonHomeGames;
-            List<Game> lastSeasonAwayGames;
-            var homeHoursBetweenGames = GetHoursBetweenLastTwoGames(homeGames);
-            var awayHoursBetweenGames = GetHoursBetweenLastTwoGames(awayGames);
-
-            if (homeGames.Count() < EARLY_SEASON_GAME_COUNT)
-            {
-                lastSeasonHomeGames = GetTeamGames(lastSeasonGames, game.homeTeamId, game.gameDate);
-                homeGames = lastSeasonHomeGames.Concat(homeGames).ToList();
-            }
-            if (awayGames.Count() < EARLY_SEASON_GAME_COUNT)
-            {
-                lastSeasonAwayGames = GetTeamGames(lastSeasonGames, game.awayTeamId, game.gameDate);
-                awayGames = lastSeasonAwayGames.Concat(awayGames).ToList();
-            }
+            var homeTeamGames = seasonGames.GamesMap[game.homeTeamId];
+            var awayTeamGames = seasonGames.GamesMap[game.awayTeamId];
+            // Lists of team games for current season
+            var homeTeamSeasonGames = homeTeamGames.CurrentSeasonGames.GetGamesBeforeDate(game.gameDate);
+            var awayTeamSeasonGames = awayTeamGames.CurrentSeasonGames.GetGamesBeforeDate(game.gameDate);
+            // List of recently played team games
+            var homeTeamRecentGames = homeTeamGames.Games.GetGamesBeforeDate(game.gameDate).Take(RECENT_GAMES);
+            var awayTeamRecentGames = awayTeamGames.Games.GetGamesBeforeDate(game.gameDate).Take(RECENT_GAMES);
+            // List of team games played that match current home/away position
+            var homeTeamHomeGames = homeTeamGames.HomeGames.GetGamesBeforeDate(game.gameDate);
+            var awayTeamAwayGames = awayTeamGames.AwayGames.GetGamesBeforeDate(game.gameDate);
+            // List of recent team games played that match current home/away position
+            var homeTeamRecentHomeGames = homeTeamGames.HomeGames.GetGamesBeforeDate(game.gameDate).Take(RECENT_GAMES);
+            var awayTeamRecentAwayGames = awayTeamGames.AwayGames.GetGamesBeforeDate(game.gameDate).Take(RECENT_GAMES);
 
             var cleanedGame = new DbCleanedGame()
             {
                 gameId = game.id,
 
-                homeWinRatio = GetWinRatioOfRecentGames(homeGames, game.homeTeamId, homeGames.Count()),
-                homeRecentWinRatio = GetWinRatioOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeGoalsAvg = GetGoalsAvgOfRecentGames(homeGames, game.homeTeamId, homeGames.Count()),
-                homeRecentGoalsAvg = GetGoalsAvgOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeConcededGoalsAvg = GetConcededGoalsAvgOfRecentGames(homeGames, game.homeTeamId, homeGames.Count()),
-                homeRecentConcededGoalsAvg = GetConcededGoalsAvgOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeRecentSogAvg = GetSogAvgOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeRecentBlockedShotsAvg = GetBlockedShotsAvgOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeRecentPpgAvg = GetPpgAvgOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeRecentHitsAvg = GetHitsAvgOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeRecentPimAvg = GetPimAvgOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeRecentTakeawaysAvg = GetTakeawaysAvgOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeRecentGiveawaysAvg = GetGiveawaysAvgOfRecentGames(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeConcededGoalsAvgAtHome = GetConcededGoalsAvgOfRecentGamesAtHome(homeGames, game.homeTeamId, homeGames.Count()),
-                homeRecentConcededGoalsAvgAtHome = GetConcededGoalsAvgOfRecentGamesAtHome(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeGoalsAvgAtHome = GetGoalsAvgOfRecentGamesAtHome(homeGames, game.homeTeamId, homeGames.Count()),
-                homeRecentGoalsAvgAtHome = GetGoalsAvgOfRecentGamesAtHome(homeGames, game.homeTeamId, RECENT_GAMES),
-                homeHoursSinceLastGame = homeHoursBetweenGames,
-                homeRosterDefenseValue = GetRosterPlayersValue(game.teamRosters.homeDefensePlayers),
-                homeRosterOffenseValue = GetRosterPlayersValue(game.teamRosters.homeOffensePlayers),
-                homeRosterGoalieValue = GetRosterPlayersValue(game.teamRosters.homeGoalies),
+                homeWinRatio = GetWinRatioOfGames(homeTeamSeasonGames, game.homeTeamId),
+                homeRecentWinRatio = GetWinRatioOfGames(homeTeamRecentGames, game.homeTeamId),
+                homeGoalsAvg = GetGoalsAvgOfGames(homeTeamSeasonGames, game.homeTeamId),
+                homeRecentGoalsAvg = GetGoalsAvgOfGames(homeTeamRecentGames, game.homeTeamId),
+                homeConcededGoalsAvg = GetConcededGoalsAvgOfGames(homeTeamSeasonGames, game.homeTeamId),
+                homeRecentConcededGoalsAvg = GetConcededGoalsAvgOfGames(homeTeamRecentGames, game.homeTeamId),
+                homeRecentSogAvg = GetSogAvgOfGames(homeTeamRecentGames, game.homeTeamId),
+                homeRecentBlockedShotsAvg = GetBlockedShotsAvgOfGames(homeTeamRecentGames, game.homeTeamId),
+                homeRecentPpgAvg = GetPpgAvgOfGames(homeTeamRecentGames, game.homeTeamId),
+                homeRecentHitsAvg = GetHitsAvgOfGames(homeTeamRecentGames, game.homeTeamId),
+                homeRecentPimAvg = GetPimAvgOfGames(homeTeamRecentGames, game.homeTeamId),
+                homeRecentTakeawaysAvg = GetTakeawaysAvgOfGames(homeTeamRecentGames, game.homeTeamId),
+                homeRecentGiveawaysAvg = GetGiveawaysAvgOfGames(homeTeamRecentGames, game.homeTeamId),
+                homeConcededGoalsAvgAtHome = GetConcededGoalsAvgOfGames(homeTeamHomeGames, game.homeTeamId),
+                homeRecentConcededGoalsAvgAtHome = GetConcededGoalsAvgOfGames(homeTeamHomeGames.Take(RECENT_GAMES), game.homeTeamId),
+                homeGoalsAvgAtHome = GetGoalsAvgOfGames(homeTeamHomeGames, game.homeTeamId),
+                homeRecentGoalsAvgAtHome = GetGoalsAvgOfGames(homeTeamRecentHomeGames, game.homeTeamId),
+                homeHoursSinceLastGame = game.GetHoursBetweenGames(homeTeamSeasonGames.FirstOrDefault()),
+                homeRosterDefenseValue = game.teamRosters.homeDefensePlayers.GetRosterPlayersValue(),
+                homeRosterOffenseValue = game.teamRosters.homeOffensePlayers.GetRosterPlayersValue(),
+                homeRosterGoalieValue = game.teamRosters.homeGoalies.GetRosterPlayersValue(),
 
 
-                awayWinRatio = GetWinRatioOfRecentGames(awayGames, game.awayTeamId, awayGames.Count()),
-                awayRecentWinRatio = GetWinRatioOfRecentGames(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayGoalsAvg = GetGoalsAvgOfRecentGames(awayGames, game.awayTeamId, awayGames.Count()),
-                awayRecentGoalsAvg = GetGoalsAvgOfRecentGames(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayConcededGoalsAvg = GetConcededGoalsAvgOfRecentGames(awayGames, game.awayTeamId, awayGames.Count()),
-                awayRecentConcededGoalsAvg = GetConcededGoalsAvgOfRecentGames(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayRecentSogAvg = GetSogAvgOfRecentGames(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayRecentBlockedShotsAvg = GetBlockedShotsAvgOfRecentGames(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayRecentPpgAvg = GetPpgAvgOfRecentGames(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayRecentHitsAvg = GetHitsAvgOfRecentGames(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayRecentPimAvg = GetPimAvgOfRecentGames(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayRecentTakeawaysAvg = GetTakeawaysAvgOfRecentGames(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayRecentGiveawaysAvg = GetGiveawaysAvgOfRecentGames(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayConcededGoalsAvgAtAway = GetConcededGoalsAvgOfRecentGamesAtAway(awayGames, game.awayTeamId, awayGames.Count()),
-                awayRecentConcededGoalsAvgAtAway = GetConcededGoalsAvgOfRecentGamesAtAway(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayGoalsAvgAtAway = GetGoalsAvgOfRecentGamesAtAway(awayGames, game.awayTeamId, awayGames.Count()),
-                awayRecentGoalsAvgAtAway = GetGoalsAvgOfRecentGamesAtAway(awayGames, game.awayTeamId, RECENT_GAMES),
-                awayHoursSinceLastGame = awayHoursBetweenGames,
-                awayRosterDefenseValue = GetRosterPlayersValue(game.teamRosters.awayDefensePlayers),
-                awayRosterOffenseValue = GetRosterPlayersValue(game.teamRosters.awayOffensePlayers),
-                awayRosterGoalieValue = GetRosterPlayersValue(game.teamRosters.awayGoalies),
+                awayWinRatio = GetWinRatioOfGames(awayTeamSeasonGames, game.awayTeamId),
+                awayRecentWinRatio = GetWinRatioOfGames(awayTeamRecentGames, game.awayTeamId),
+                awayGoalsAvg = GetGoalsAvgOfGames(awayTeamSeasonGames, game.awayTeamId),
+                awayRecentGoalsAvg = GetGoalsAvgOfGames(awayTeamRecentGames, game.awayTeamId),
+                awayConcededGoalsAvg = GetConcededGoalsAvgOfGames(awayTeamSeasonGames, game.awayTeamId),
+                awayRecentConcededGoalsAvg = GetConcededGoalsAvgOfGames(awayTeamRecentGames, game.awayTeamId),
+                awayRecentSogAvg = GetSogAvgOfGames(awayTeamRecentGames, game.awayTeamId),
+                awayRecentBlockedShotsAvg = GetBlockedShotsAvgOfGames(awayTeamRecentGames, game.awayTeamId),
+                awayRecentPpgAvg = GetPpgAvgOfGames(awayTeamRecentGames, game.awayTeamId),
+                awayRecentHitsAvg = GetHitsAvgOfGames(awayTeamRecentGames, game.awayTeamId),
+                awayRecentPimAvg = GetPimAvgOfGames(awayTeamRecentGames, game.awayTeamId),
+                awayRecentTakeawaysAvg = GetTakeawaysAvgOfGames(awayTeamRecentGames, game.awayTeamId),
+                awayRecentGiveawaysAvg = GetGiveawaysAvgOfGames(awayTeamRecentGames, game.awayTeamId),
+                awayConcededGoalsAvgAtAway = GetConcededGoalsAvgOfGames(awayTeamAwayGames, game.awayTeamId),
+                awayRecentConcededGoalsAvgAtAway = GetConcededGoalsAvgOfGames(awayTeamRecentAwayGames, game.awayTeamId),
+                awayGoalsAvgAtAway = GetGoalsAvgOfGames(awayTeamAwayGames, game.awayTeamId),
+                awayRecentGoalsAvgAtAway = GetGoalsAvgOfGames(awayTeamRecentAwayGames, game.awayTeamId),
+                awayHoursSinceLastGame = game.GetHoursBetweenGames(awayTeamSeasonGames.FirstOrDefault()),
+                awayRosterDefenseValue = game.teamRosters.awayDefensePlayers.GetRosterPlayersValue(),
+                awayRosterOffenseValue = game.teamRosters.awayOffensePlayers.GetRosterPlayersValue(),
+                awayRosterGoalieValue = game.teamRosters.awayGoalies.GetRosterPlayersValue(),
             };
             return cleanedGame;
         }
-
-        private static double GetRosterPlayersValue(List<DbPlayer> players)
-        {
-            double skillScore = 0;
-            foreach(var player in players)
-            {
-                skillScore += player.value;
-            }
-
-            return skillScore;
-        }
-
-        // If no game has been played set default as 4 days of rest (season hasn't started)
-        public static readonly int DEFAULT_HOURS = 100;
-        public static double GetWinRatioOfRecentGames(List<Game> teamSeasonGames, int teamId, int numberOfGames)
+        /// <summary>
+        /// Gets the win ratio of the last games specified by numberOfGames
+        /// </summary>
+        /// <param name="teamSeasonGames">Games a team has played, sorted by recency</param>
+        /// <param name="teamId">Team to get ratio of</param>
+        /// <returns>The ratio of wins</returns>
+        public static double GetWinRatioOfGames(IEnumerable<Game> teamSeasonGames, int teamId)
         {
             double winRatio = 0;
             int count = 0;
             foreach (var game in teamSeasonGames)
             {
-                if (count == numberOfGames)
-                    break;
-                if (isWin(game, teamId))
+                if (game.IsWin(teamId))
                     winRatio++;
                 count++;
             }
@@ -109,22 +101,18 @@ namespace BusinessLogic.Mappers
                 winRatio = winRatio / count;
             return winRatio;
         }
-
-        private static bool isWin(Game game, int teamId)
-        {
-            if (game.homeTeamId == teamId && game.winner == Winner.HOME) return true;
-            if (game.awayTeamId == teamId && game.winner == Winner.AWAY) return true;
-            return false;
-        }
-
-        public static double GetGoalsAvgOfRecentGames(List<Game> teamGames, int teamId, int numberOfGames)
+        /// <summary>
+        /// Gets the goal average of the games, for the given team
+        /// </summary>
+        /// <param name="teamGames">List of games sorted by date (recent first)</param>
+        /// <param name="teamId">Team id</param>
+        /// <returns>Goals average</returns>
+        public static double GetGoalsAvgOfGames(IEnumerable<Game> teamGames, int teamId)
         {
             double goalsAvg = 0;
             int count = 0;
             foreach (var game in teamGames)
             {
-                if (count == numberOfGames)
-                    break;
                 if (game.homeTeamId == teamId)
                     goalsAvg += game.homeGoals;
                 else if (game.awayTeamId == teamId)
@@ -136,14 +124,18 @@ namespace BusinessLogic.Mappers
                 goalsAvg = goalsAvg / count;
             return goalsAvg;
         }
-        public static double GetConcededGoalsAvgOfRecentGames(List<Game> teamGames, int teamId, int numberOfGames)
+        /// <summary>
+        /// Gets the conceded goal average of the games, for the given team
+        /// </summary>
+        /// <param name="teamGames">list of games played</param>
+        /// <param name="teamId">Team id</param>
+        /// <returns>Conceded goals average</returns>
+        public static double GetConcededGoalsAvgOfGames(IEnumerable<Game> teamGames, int teamId)
         {
             double goalsAvg = 0;
             int count = 0;
             foreach (var game in teamGames)
             {
-                if (count == numberOfGames)
-                    break;
                 if (game.awayTeamId == teamId)
                     goalsAvg += game.homeGoals;
                 else if (game.homeTeamId == teamId)
@@ -155,15 +147,18 @@ namespace BusinessLogic.Mappers
                 goalsAvg = goalsAvg / count;
             return goalsAvg;
         }
-
-        public static double GetSogAvgOfRecentGames(List<Game> teamGames, int teamId, int numberOfGames)
+        /// <summary>
+        /// Gets the shots on goal average of the games, for the given team
+        /// </summary>
+        /// <param name="teamGames">list of games played</param>
+        /// <param name="teamId">Team id</param>
+        /// <returns>Shots on goal average</returns>
+        public static double GetSogAvgOfGames(IEnumerable<Game> teamGames, int teamId)
         {
             double sogAvg = 0;
             int count = 0;
             foreach (var game in teamGames)
             {
-                if (count == numberOfGames)
-                    break;
                 if (game.homeTeamId == teamId)
                     sogAvg += game.homeSOG;
                 else if (game.awayTeamId == teamId)
@@ -175,15 +170,18 @@ namespace BusinessLogic.Mappers
                 sogAvg = sogAvg / count;
             return sogAvg;
         }
-
-        public static double GetBlockedShotsAvgOfRecentGames(List<Game> teamGames, int teamId, int numberOfGames)
+        /// <summary>
+        /// Gets the blocked shots average of the games, for the given team
+        /// </summary>
+        /// <param name="teamGames">List of team games</param>
+        /// <param name="teamId">Team id</param>
+        /// <returns>Blocked shots average</returns>
+        public static double GetBlockedShotsAvgOfGames(IEnumerable<Game> teamGames, int teamId)
         {
             double blockedSogAvg = 0;
             int count = 0;
             foreach (var game in teamGames)
             {
-                if (count == numberOfGames)
-                    break;
                 if (game.homeTeamId == teamId)
                     blockedSogAvg += game.homeBlockedShots;
                 else if (game.awayTeamId == teamId)
@@ -195,14 +193,18 @@ namespace BusinessLogic.Mappers
                 blockedSogAvg = blockedSogAvg / count;
             return blockedSogAvg;
         }
-        public static double GetPpgAvgOfRecentGames(List<Game> teamGames, int teamId, int numberOfGames)
+        /// <summary>
+        /// Gets the power play goal average of the games, for the given team
+        /// </summary>
+        /// <param name="teamGames">List of games played</param>
+        /// <param name="teamId">Team id</param>
+        /// <returns>Power play goals average</returns>
+        public static double GetPpgAvgOfGames(IEnumerable<Game> teamGames, int teamId)
         {
             double ppgAvg = 0;
             int count = 0;
             foreach (var game in teamGames)
             {
-                if (count == numberOfGames)
-                    break;
                 if (game.homeTeamId == teamId)
                     ppgAvg += game.homePPG;
                 else if (game.awayTeamId == teamId)
@@ -214,14 +216,18 @@ namespace BusinessLogic.Mappers
                 ppgAvg = ppgAvg / count;
             return ppgAvg;
         }
-        public static double GetHitsAvgOfRecentGames(List<Game> teamGames, int teamId, int numberOfGames)
+        /// <summary>
+        /// Gets the hits average of the games, for the given team
+        /// </summary>
+        /// <param name="teamGames">List of games played</param>
+        /// <param name="teamId">Team id</param>
+        /// <returns>Hits average</returns>
+        public static double GetHitsAvgOfGames(IEnumerable<Game> teamGames, int teamId)
         {
             double hitsAvg = 0;
             int count = 0;
             foreach (var game in teamGames)
             {
-                if (count == numberOfGames)
-                    break;
                 if (game.homeTeamId == teamId)
                     hitsAvg += game.homeHits;
                 else if (game.awayTeamId == teamId)
@@ -233,14 +239,18 @@ namespace BusinessLogic.Mappers
                 hitsAvg = hitsAvg / count;
             return hitsAvg;
         }
-        public static double GetPimAvgOfRecentGames(List<Game> teamGames, int teamId, int numberOfGames)
+        /// <summary>
+        /// Gets the penalty minute average of the games, for the given team
+        /// </summary>
+        /// <param name="teamGames">List of games played</param>
+        /// <param name="teamId">Team id</param>
+        /// <returns>Penalty minute average</returns>
+        public static double GetPimAvgOfGames(IEnumerable<Game> teamGames, int teamId)
         {
             double pimAvg = 0;
             int count = 0;
             foreach (var game in teamGames)
             {
-                if (count == numberOfGames)
-                    break;
                 if (game.homeTeamId == teamId)
                     pimAvg += game.homePIM;
                 else if (game.awayTeamId == teamId)
@@ -252,14 +262,18 @@ namespace BusinessLogic.Mappers
                 pimAvg = pimAvg / count;
             return pimAvg;
         }
-        public static double GetTakeawaysAvgOfRecentGames(List<Game> teamGames, int teamId, int numberOfGames)
+        /// <summary>
+        /// Gets the Takeaway average of the games, for the given team
+        /// </summary>
+        /// <param name="teamGames">List of games played</param>
+        /// <param name="teamId">Team id</param>
+        /// <returns>Takeaway average</returns>
+        public static double GetTakeawaysAvgOfGames(IEnumerable<Game> teamGames, int teamId)
         {
             double takeawayAvg = 0;
             int count = 0;
             foreach (var game in teamGames)
             {
-                if (count == numberOfGames)
-                    break;
                 if (game.homeTeamId == teamId)
                     takeawayAvg += game.homeTakeaways;
                 else if (game.awayTeamId == teamId)
@@ -271,22 +285,18 @@ namespace BusinessLogic.Mappers
                 takeawayAvg = takeawayAvg / count;
             return takeawayAvg;
         }
-
-        public static bool GetIsExcluded(List<Game> awayGames, List<Game> homeGames, int numberOfGamesToExclude)
-        {
-            if (awayGames.Count() < numberOfGamesToExclude || homeGames.Count() < numberOfGamesToExclude)
-                return true;
-            return false;
-        }
-
-        public static double GetGiveawaysAvgOfRecentGames(List<Game> teamGames, int teamId, int numberOfGames)
+        /// <summary>
+        /// Gets the giveaway average of the games, for the given team
+        /// </summary>
+        /// <param name="teamGames">List of team games</param>
+        /// <param name="teamId">Team id</param>
+        /// <returns>Giveaway average</returns>
+        public static double GetGiveawaysAvgOfGames(IEnumerable<Game> teamGames, int teamId)
         {
             double giveawayAvg = 0;
             int count = 0;
             foreach (var game in teamGames)
             {
-                if (count == numberOfGames)
-                    break;
                 if (game.homeTeamId == teamId)
                     giveawayAvg += game.homeGiveaways;
                 else if (game.awayTeamId == teamId)
@@ -298,45 +308,5 @@ namespace BusinessLogic.Mappers
                 giveawayAvg = giveawayAvg / count;
             return giveawayAvg;
         }
-        public static double GetConcededGoalsAvgOfRecentGamesAtHome(List<Game> teamGames, int teamId, int numberOfGames)
-        {
-            teamGames = teamGames.Where(game => game.homeTeamId == teamId).ToList();
-            return GetConcededGoalsAvgOfRecentGames(teamGames, teamId, numberOfGames);
-        }
-        public static double GetConcededGoalsAvgOfRecentGamesAtAway(List<Game> teamGames, int teamId, int numberOfGames)
-        {
-            teamGames = teamGames.Where(game => game.awayTeamId == teamId).ToList();
-            return GetConcededGoalsAvgOfRecentGames(teamGames, teamId, numberOfGames);
-        }
-        public static double GetGoalsAvgOfRecentGamesAtHome(List<Game> teamGames, int teamId, int numberOfGames)
-        {
-            teamGames = teamGames.Where(game => game.homeTeamId == teamId).ToList();
-            return GetGoalsAvgOfRecentGames(teamGames, teamId, numberOfGames);
-        }
-        public static double GetGoalsAvgOfRecentGamesAtAway(List<Game> teamGames, int teamId, int numberOfGames)
-        {
-            teamGames = teamGames.Where(game => game.awayTeamId == teamId).ToList();
-            return GetGoalsAvgOfRecentGames(teamGames, teamId, numberOfGames);
-        }
-        // If only one game has been played return default rest, otherwise find how many hours
-        // since last game
-        public static double GetHoursBetweenLastTwoGames(List<Game> games)
-        {
-            if (games.Count() < 2)
-                return DEFAULT_HOURS;
-            var currentDate = games[0].gameDate;
-            var lastDate = games[1].gameDate;
-
-            var hourDifference = (currentDate - lastDate).TotalHours;
-
-            return hourDifference;
-        }
-        private static List<Game> GetTeamGames(List<Game> seasonsGames, int teamId, DateTime currentGameDate)
-        {
-            // Get games that happened before current game and include the team
-            return seasonsGames.Where(i => i.gameDate < currentGameDate)
-                .Where(n => n.awayTeamId == teamId || n.homeTeamId == teamId).ToList();
-        }
     }
 }
-

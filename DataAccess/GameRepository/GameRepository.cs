@@ -12,7 +12,11 @@ namespace DataAccess.GameRepository
         {
             _dbContext = dbContext;
         }
-
+        /// <summary>
+        /// Gets a seasons list of games
+        /// </summary>
+        /// <param name="seasonStartYear">Year to get games for</param>
+        /// <returns>List of season games</returns>
         public async Task<IEnumerable<Game>> GetSeasonGames(int seasonStartYear)
         {
             var dbGames = await GetSeasonRawGames(seasonStartYear);
@@ -24,6 +28,11 @@ namespace DataAccess.GameRepository
             }
             return games;
         }
+        /// <summary>
+        /// Gets season of database model of games
+        /// </summary>
+        /// <param name="seasonStartYear">Year to get games for</param>
+        /// <returns>List of database games</returns>
         private async Task<IEnumerable<DbGame>> GetSeasonRawGames(int seasonStartYear)
         {
             return await _dbContext.Game.Where(x => x.seasonStartYear == seasonStartYear).ToListAsync();

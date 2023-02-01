@@ -4,6 +4,9 @@ namespace Entities.Models
 {
     public class Game
     {
+        // If no game has been played set default as 4 days of rest (season hasn't started)
+        public static readonly int DEFAULT_HOURS = 100;
+
         public int id { get; set; } = -1;
         public int homeTeamId { get; set; }
         public int awayTeamId { get; set; }
@@ -39,6 +42,30 @@ namespace Entities.Models
         public bool IsValid()
         {
             return homeFaceOffWinPercent != 0 || awayFaceOffWinPercent != 0;
+        }
+        /// <summary>
+        /// Gets if the team won or not
+        /// </summary>
+        /// <param name="teamId"></param>
+        /// <returns></returns>
+        public bool IsWin(int teamId)
+        {
+            if (homeTeamId == teamId && winner == Winner.HOME) return true;
+            if (awayTeamId == teamId && winner == Winner.AWAY) return true;
+            return false;
+        }
+        /// <summary>
+        /// Gets the hours between the current game and game passed in
+        /// </summary>
+        /// <param name="game">Game to find hours between.</param>
+        /// <returns></returns>
+        public double GetHoursBetweenGames(Game? game)
+        {
+            if (game == null)
+                return DEFAULT_HOURS;
+            var hourDifference = (gameDate - game.gameDate).TotalHours;
+
+            return Math.Abs(hourDifference);
         }
     }
 }

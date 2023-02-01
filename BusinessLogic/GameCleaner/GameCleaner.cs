@@ -22,6 +22,11 @@ namespace BusinessLogic.GameCleaner
             _playerRepo = playerRepo;
             _logger = loggerFactory.CreateLogger<GameCleaner>();
         }
+        /// <summary>
+        /// Gets raw game data from the database and cleans and stores machine learning ready data in the database.
+        /// </summary>
+        /// <param name="seasonYearRange">The years to run the program for</param>
+        /// <returns>None</returns>
         public async Task CleanGamesInSeasons(YearRange seasonYearRange)
 		{
             for (int seasonStartYear = seasonYearRange.StartYear; seasonStartYear <= seasonYearRange.EndYear; seasonStartYear++)
@@ -29,7 +34,7 @@ namespace BusinessLogic.GameCleaner
                 // Add games to Predicted Game?
 
                 var games = await _gameRepo.GetSeasonGames(seasonStartYear);
-                var existingCleanedGames = await _cleanedGameRepo.GetSeasonGames(seasonStartYear);
+                var existingCleanedGames = await _cleanedGameRepo.GetSeasonOfCleanedGames(seasonStartYear);
 
                 var gamesToClean = GetGamesToClean(existingCleanedGames, games);
 
@@ -46,7 +51,11 @@ namespace BusinessLogic.GameCleaner
                 _logger.LogInformation("Number of Games Added To Season " + seasonStartYear.ToString() + ": " + cleanedGames.Count().ToString());
             }
         }
-
+        /// <summary>
+        /// Adds team rosters to a game object
+        /// </summary>
+        /// <param name="games"></param>
+        /// <returns></returns>
         private async Task<IEnumerable<Game>> BuildRosters(IEnumerable<Game> games)
         {
             foreach(var game in games)
@@ -56,63 +65,38 @@ namespace BusinessLogic.GameCleaner
             }
             return games;
         }
-
+        /// <summary>
+        /// Given a list of raw games, these games are cleaned to be ML ready and returned.
+        /// </summary>
+        /// <param name="gamesToClean">List of raw games</param>
+        /// <returns>List of cleaned games</returns>
         private async Task<IEnumerable<DbCleanedGame>> CleanGames(IEnumerable<Game> gamesToClean)
         {
             int seasonStartYear = gamesToClean.First().seasonStartYear;
             var seasonGames = await _gameRepo.GetSeasonGames(seasonStartYear);
             var lastSeasonGames = await _gameRepo.GetSeasonGames(seasonStartYear - 1);
-            seasonGames = seasonGames.OrderBy(i => i.gameDate).Reverse().ToList();
-            lastSeasonGames = lastSeasonGames.OrderBy(i => i.gameDate).Reverse().ToList();
+            var gameMap = new SeasonGames(seasonGames.Concat(lastSeasonGames));
 
             var cleanedGames = new List<DbCleanedGame>();
             foreach(var game in gamesToClean)
             {
-                cleanedGames.Add(MapGameToDbCleanedGame.Map(game, seasonGames.ToList(), lastSeasonGames.ToList()));
+                cleanedGames.Add(MapGameToDbCleanedGame.Map(game, gameMap));
             }
             return cleanedGames;
         }
-
-        private IEnumerable<Game> GetGamesToClean(IEnumerable<DbCleanedGame> cleanedGames, IEnumerable<Game> games)
+        /// <summary>
+        /// Given a list of already cleaned games and list of raw games, returns a list of raw games that need to be cleaned
+        /// </summary>
+        /// <param name="cleanedGames">cleaned games that already exist</param>
+        /// <param name="games">raw games</param>
+        /// <returns>Games that need to be cleaned</returns>
+        private static IEnumerable<Game> GetGamesToClean(IEnumerable<DbCleanedGame> cleanedGames, IEnumerable<Game> games)
         {
             var gamesToClean = new List<Game>();
-            gamesToClean.AddRange(GetFutureGames(games));
-            gamesToClean.AddRange(GetNewGames(cleanedGames, games));
+            gamesToClean.AddRange(games.GetFutureGames());
+            gamesToClean.AddRange(cleanedGames.GetNewGames(games));
 
-            return GetUniqueGames(gamesToClean);
-
-        }
-
-        private IEnumerable<Game> GetUniqueGames(IEnumerable<Game> gamesToClean)
-        {
-            return gamesToClean.GroupBy(x => x.id).Select(x => x.First()).ToList();
-        }
-
-        private IEnumerable<Game> GetNewGames(IEnumerable<DbCleanedGame> cleanedGames, IEnumerable<Game> games)
-        {
-            var newGames = new List<Game>();
-            cleanedGames = cleanedGames.ToList();
-
-            foreach(var game in games)
-            {
-                if (cleanedGames.Any(x => x.gameId == game.id))
-                    continue;
-                newGames.Add(game);
-            }
-
-            return newGames;
-        }
-
-        private IEnumerable<Game> GetFutureGames(IEnumerable<Game> games)
-        {
-            var futureGames = new List<Game>();
-            foreach(var game in games)
-            {
-                if (!game.hasBeenPlayed)
-                    futureGames.Add(game);
-            }
-
-            return futureGames;
+            return gamesToClean.GetUniqueGames();
         }
     }
 }
