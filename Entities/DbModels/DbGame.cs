@@ -1,5 +1,8 @@
 ﻿namespace Entities.DbModels
 {
+    /// <summary>
+    /// Enum used for outcome of game
+    /// </summary>
     public enum Winner
     {
         HOME,

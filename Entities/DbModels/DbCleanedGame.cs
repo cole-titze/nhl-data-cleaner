@@ -54,6 +54,10 @@ namespace Entities.DbModels
         [ForeignKey("gameId")]
         public DbGame? game { get; set; } = new DbGame();
 
+        /// <summary>
+        /// Clones a given game into this object
+        /// </summary>
+        /// <param name="game">Game to clone</param>
         public void Clone(DbCleanedGame game)
         {
             gameId = game.gameId;

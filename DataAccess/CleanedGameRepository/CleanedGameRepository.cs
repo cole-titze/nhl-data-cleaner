@@ -11,7 +11,11 @@ namespace DataAccess.CleanedGameRepository
         {
             _dbContext = dbContext;
         }
-
+        /// <summary>
+        /// Adds cleaned games if they don't exist. Updates them if they exist
+        /// </summary>
+        /// <param name="cleanedGames">List of cleaned games to add to database</param>
+        /// <returns>None</returns>
         public async Task AddUpdateCleanedGames(IEnumerable<DbCleanedGame> cleanedGames)
         {
             var addList = new List<DbCleanedGame>();
@@ -32,7 +36,7 @@ namespace DataAccess.CleanedGameRepository
         }
 
         /// <summary>
-        /// Gets a seasons worth of games and stores them in the cache variable if it doesn't already exist
+        /// Gets a seasons worth of cleaned games and stores them in the cache variable if it doesn't already exist
         /// </summary>
         /// <param name="seasonStartYear">Season start year</param>
         /// <returns>None</returns>
@@ -42,8 +46,12 @@ namespace DataAccess.CleanedGameRepository
             if (cachedGame == null || cachedGame.game!.seasonStartYear != seasonStartYear)
                 _cachedSeasonsGames = await _dbContext.CleanedGame.Include(x => x.game).Where(x => x.game!.seasonStartYear == seasonStartYear).ToListAsync();
         }
-
-        public async Task<IEnumerable<DbCleanedGame>> GetSeasonGames(int seasonStartYear)
+        /// <summary>
+        /// Gets a seasons worth of cleaned games
+        /// </summary>
+        /// <param name="seasonStartYear">Year to get games for</param>
+        /// <returns>List of seasons cleaned games</returns>
+        public async Task<IEnumerable<DbCleanedGame>> GetSeasonOfCleanedGames(int seasonStartYear)
         {
             await CacheSeasonOfCleanedGames(seasonStartYear);
             return _cachedSeasonsGames;

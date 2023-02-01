@@ -11,33 +11,34 @@ namespace BusinessLogic.Mappers
         /// Converts a raw game into a cleaned, ML ready, game. Uses previous games for certain features.
         /// </summary>
         /// <param name="game">Game to clean</param>
-        /// <param name="seasonGames">Games from the current season</param>
-        /// <param name="lastSeasonGames">Games from the previous season</param>
+        /// <param name="seasonGames">Dictionary of team ids and Team games</param>
         /// <returns>A cleaned game</returns>
-        public static DbCleanedGame Map(Game game, SeasonGames teamGames)
+        public static DbCleanedGame Map(Game game, SeasonGames seasonGames)
 		{
-            // Lists of all available team games
-            var homeTeamGames = teamGames.GamesMap[game.homeTeamId].Games.GetGamesBeforeDate(game.gameDate);
-            var awayTeamGames = teamGames.GamesMap[game.awayTeamId].Games.GetGamesBeforeDate(game.gameDate);
+            var homeTeamGames = seasonGames.GamesMap[game.homeTeamId];
+            var awayTeamGames = seasonGames.GamesMap[game.awayTeamId];
+            // Lists of team games for current season
+            var homeTeamSeasonGames = homeTeamGames.CurrentSeasonGames.GetGamesBeforeDate(game.gameDate);
+            var awayTeamSeasonGames = awayTeamGames.CurrentSeasonGames.GetGamesBeforeDate(game.gameDate);
             // List of recently played team games
-            var homeTeamRecentGames = homeTeamGames.Take(RECENT_GAMES);
-            var awayTeamRecentGames = awayTeamGames.Take(RECENT_GAMES);
+            var homeTeamRecentGames = homeTeamGames.Games.GetGamesBeforeDate(game.gameDate).Take(RECENT_GAMES);
+            var awayTeamRecentGames = awayTeamGames.Games.GetGamesBeforeDate(game.gameDate).Take(RECENT_GAMES);
             // List of team games played that match current home/away position
-            var homeTeamHomeGames = teamGames.GamesMap[game.homeTeamId].HomeGames.GetGamesBeforeDate(game.gameDate);
-            var awayTeamAwayGames = teamGames.GamesMap[game.awayTeamId].AwayGames.GetGamesBeforeDate(game.gameDate);
+            var homeTeamHomeGames = homeTeamGames.HomeGames.GetGamesBeforeDate(game.gameDate);
+            var awayTeamAwayGames = awayTeamGames.AwayGames.GetGamesBeforeDate(game.gameDate);
             // List of recent team games played that match current home/away position
-            var homeTeamRecentHomeGames = homeTeamHomeGames.Take(RECENT_GAMES);
-            var awayTeamRecentAwayGames = homeTeamHomeGames.Take(RECENT_GAMES);
+            var homeTeamRecentHomeGames = homeTeamGames.HomeGames.GetGamesBeforeDate(game.gameDate).Take(RECENT_GAMES);
+            var awayTeamRecentAwayGames = awayTeamGames.AwayGames.GetGamesBeforeDate(game.gameDate).Take(RECENT_GAMES);
 
             var cleanedGame = new DbCleanedGame()
             {
                 gameId = game.id,
 
-                homeWinRatio = GetWinRatioOfGames(homeTeamGames, game.homeTeamId),
+                homeWinRatio = GetWinRatioOfGames(homeTeamSeasonGames, game.homeTeamId),
                 homeRecentWinRatio = GetWinRatioOfGames(homeTeamRecentGames, game.homeTeamId),
-                homeGoalsAvg = GetGoalsAvgOfGames(homeTeamGames, game.homeTeamId),
+                homeGoalsAvg = GetGoalsAvgOfGames(homeTeamSeasonGames, game.homeTeamId),
                 homeRecentGoalsAvg = GetGoalsAvgOfGames(homeTeamRecentGames, game.homeTeamId),
-                homeConcededGoalsAvg = GetConcededGoalsAvgOfGames(homeTeamGames, game.homeTeamId),
+                homeConcededGoalsAvg = GetConcededGoalsAvgOfGames(homeTeamSeasonGames, game.homeTeamId),
                 homeRecentConcededGoalsAvg = GetConcededGoalsAvgOfGames(homeTeamRecentGames, game.homeTeamId),
                 homeRecentSogAvg = GetSogAvgOfGames(homeTeamRecentGames, game.homeTeamId),
                 homeRecentBlockedShotsAvg = GetBlockedShotsAvgOfGames(homeTeamRecentGames, game.homeTeamId),
@@ -50,17 +51,17 @@ namespace BusinessLogic.Mappers
                 homeRecentConcededGoalsAvgAtHome = GetConcededGoalsAvgOfGames(homeTeamHomeGames.Take(RECENT_GAMES), game.homeTeamId),
                 homeGoalsAvgAtHome = GetGoalsAvgOfGames(homeTeamHomeGames, game.homeTeamId),
                 homeRecentGoalsAvgAtHome = GetGoalsAvgOfGames(homeTeamRecentHomeGames, game.homeTeamId),
-                homeHoursSinceLastGame = game.GetHoursBetweenGames(homeTeamGames.FirstOrDefault()),
+                homeHoursSinceLastGame = game.GetHoursBetweenGames(homeTeamSeasonGames.FirstOrDefault()),
                 homeRosterDefenseValue = game.teamRosters.homeDefensePlayers.GetRosterPlayersValue(),
                 homeRosterOffenseValue = game.teamRosters.homeOffensePlayers.GetRosterPlayersValue(),
                 homeRosterGoalieValue = game.teamRosters.homeGoalies.GetRosterPlayersValue(),
 
 
-                awayWinRatio = GetWinRatioOfGames(awayTeamGames, game.awayTeamId),
+                awayWinRatio = GetWinRatioOfGames(awayTeamSeasonGames, game.awayTeamId),
                 awayRecentWinRatio = GetWinRatioOfGames(awayTeamRecentGames, game.awayTeamId),
-                awayGoalsAvg = GetGoalsAvgOfGames(awayTeamGames, game.awayTeamId),
+                awayGoalsAvg = GetGoalsAvgOfGames(awayTeamSeasonGames, game.awayTeamId),
                 awayRecentGoalsAvg = GetGoalsAvgOfGames(awayTeamRecentGames, game.awayTeamId),
-                awayConcededGoalsAvg = GetConcededGoalsAvgOfGames(awayTeamGames, game.awayTeamId),
+                awayConcededGoalsAvg = GetConcededGoalsAvgOfGames(awayTeamSeasonGames, game.awayTeamId),
                 awayRecentConcededGoalsAvg = GetConcededGoalsAvgOfGames(awayTeamRecentGames, game.awayTeamId),
                 awayRecentSogAvg = GetSogAvgOfGames(awayTeamRecentGames, game.awayTeamId),
                 awayRecentBlockedShotsAvg = GetBlockedShotsAvgOfGames(awayTeamRecentGames, game.awayTeamId),
@@ -73,7 +74,7 @@ namespace BusinessLogic.Mappers
                 awayRecentConcededGoalsAvgAtAway = GetConcededGoalsAvgOfGames(awayTeamRecentAwayGames, game.awayTeamId),
                 awayGoalsAvgAtAway = GetGoalsAvgOfGames(awayTeamAwayGames, game.awayTeamId),
                 awayRecentGoalsAvgAtAway = GetGoalsAvgOfGames(awayTeamRecentAwayGames, game.awayTeamId),
-                awayHoursSinceLastGame = game.GetHoursBetweenGames(awayTeamGames.FirstOrDefault()),
+                awayHoursSinceLastGame = game.GetHoursBetweenGames(awayTeamSeasonGames.FirstOrDefault()),
                 awayRosterDefenseValue = game.teamRosters.awayDefensePlayers.GetRosterPlayersValue(),
                 awayRosterOffenseValue = game.teamRosters.awayOffensePlayers.GetRosterPlayersValue(),
                 awayRosterGoalieValue = game.teamRosters.awayGoalies.GetRosterPlayersValue(),

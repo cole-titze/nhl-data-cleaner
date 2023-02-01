@@ -11,7 +11,11 @@ namespace DataAccess.PlayerRepository
         {
             _dbContext = dbContext;
         }
-
+        /// <summary>
+        /// Gets the game roster for a given game
+        /// </summary>
+        /// <param name="game">Game to get roster for</param>
+        /// <returns>Game roster</returns>
         public async Task<GameRoster> GetGameRoster(Game game)
         {
             DbPlayer? playerValue;

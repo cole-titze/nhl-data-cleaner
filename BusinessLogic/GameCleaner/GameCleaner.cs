@@ -34,7 +34,7 @@ namespace BusinessLogic.GameCleaner
                 // Add games to Predicted Game?
 
                 var games = await _gameRepo.GetSeasonGames(seasonStartYear);
-                var existingCleanedGames = await _cleanedGameRepo.GetSeasonGames(seasonStartYear);
+                var existingCleanedGames = await _cleanedGameRepo.GetSeasonOfCleanedGames(seasonStartYear);
 
                 var gamesToClean = GetGamesToClean(existingCleanedGames, games);
 
@@ -90,59 +90,13 @@ namespace BusinessLogic.GameCleaner
         /// <param name="cleanedGames">cleaned games that already exist</param>
         /// <param name="games">raw games</param>
         /// <returns>Games that need to be cleaned</returns>
-        private IEnumerable<Game> GetGamesToClean(IEnumerable<DbCleanedGame> cleanedGames, IEnumerable<Game> games)
+        private static IEnumerable<Game> GetGamesToClean(IEnumerable<DbCleanedGame> cleanedGames, IEnumerable<Game> games)
         {
             var gamesToClean = new List<Game>();
-            gamesToClean.AddRange(GetFutureGames(games));
-            gamesToClean.AddRange(GetNewGames(cleanedGames, games));
+            gamesToClean.AddRange(games.GetFutureGames());
+            gamesToClean.AddRange(cleanedGames.GetNewGames(games));
 
-            return GetUniqueGames(gamesToClean);
-
-        }
-        /// <summary>
-        /// Removes duplicate games
-        /// </summary>
-        /// <param name="gamesToClean">List of raw games</param>
-        /// <returns>A unique list of non-duplicate games</returns>
-        private IEnumerable<Game> GetUniqueGames(IEnumerable<Game> gamesToClean)
-        {
-            return gamesToClean.GroupBy(x => x.id).Select(x => x.First()).ToList();
-        }
-        /// <summary>
-        /// Given existing clean games and list of raw games, returns games that do not currently exist.
-        /// </summary>
-        /// <param name="cleanedGames">List of already cleaned games</param>
-        /// <param name="games">List of raw games</param>
-        /// <returns>List of games that did not previously exist</returns>
-        private IEnumerable<Game> GetNewGames(IEnumerable<DbCleanedGame> cleanedGames, IEnumerable<Game> games)
-        {
-            var newGames = new List<Game>();
-            cleanedGames = cleanedGames.ToList();
-
-            foreach(var game in games)
-            {
-                if (cleanedGames.Any(x => x.gameId == game.id))
-                    continue;
-                newGames.Add(game);
-            }
-
-            return newGames;
-        }
-        /// <summary>
-        /// Given a list of games, returns a list of games that have not been played yet.
-        /// </summary>
-        /// <param name="games">List of games to check</param>
-        /// <returns>Games that have not been played yet</returns>
-        private IEnumerable<Game> GetFutureGames(IEnumerable<Game> games)
-        {
-            var futureGames = new List<Game>();
-            foreach(var game in games)
-            {
-                if (!game.hasBeenPlayed)
-                    futureGames.Add(game);
-            }
-
-            return futureGames;
+            return gamesToClean.GetUniqueGames();
         }
     }
 }
