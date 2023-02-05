@@ -6,7 +6,6 @@ namespace BusinessLogic.Mappers
 	public static class MapGameToDbCleanedGame
 	{
         private const int RECENT_GAMES = 5;
-        private const int EARLY_SEASON_GAME_COUNT = 15;
         /// <summary>
         /// Converts a raw game into a cleaned, ML ready, game. Uses previous games for certain features.
         /// </summary>
@@ -52,9 +51,9 @@ namespace BusinessLogic.Mappers
                 homeGoalsAvgAtHome = GetGoalsAvgOfGames(homeTeamHomeGames, game.homeTeamId),
                 homeRecentGoalsAvgAtHome = GetGoalsAvgOfGames(homeTeamRecentHomeGames, game.homeTeamId),
                 homeHoursSinceLastGame = game.GetHoursBetweenGames(homeTeamSeasonGames.FirstOrDefault()),
-                homeRosterDefenseValue = game.teamRosters.homeDefensePlayers.GetRosterPlayersValue(),
-                homeRosterOffenseValue = game.teamRosters.homeOffensePlayers.GetRosterPlayersValue(),
-                homeRosterGoalieValue = game.teamRosters.homeGoalies.GetRosterPlayersValue(),
+                homeRosterDefenseValue = game.teamRosters.HomeDefensePlayers.GetRosterPlayersValue(),
+                homeRosterOffenseValue = game.teamRosters.HomeOffensePlayers.GetRosterPlayersValue(),
+                homeRosterGoalieValue = game.teamRosters.HomeGoalies.GetRosterPlayersValue(),
 
 
                 awayWinRatio = GetWinRatioOfGames(awayTeamSeasonGames, game.awayTeamId),
@@ -75,9 +74,9 @@ namespace BusinessLogic.Mappers
                 awayGoalsAvgAtAway = GetGoalsAvgOfGames(awayTeamAwayGames, game.awayTeamId),
                 awayRecentGoalsAvgAtAway = GetGoalsAvgOfGames(awayTeamRecentAwayGames, game.awayTeamId),
                 awayHoursSinceLastGame = game.GetHoursBetweenGames(awayTeamSeasonGames.FirstOrDefault()),
-                awayRosterDefenseValue = game.teamRosters.awayDefensePlayers.GetRosterPlayersValue(),
-                awayRosterOffenseValue = game.teamRosters.awayOffensePlayers.GetRosterPlayersValue(),
-                awayRosterGoalieValue = game.teamRosters.awayGoalies.GetRosterPlayersValue(),
+                awayRosterDefenseValue = game.teamRosters.AwayDefensePlayers.GetRosterPlayersValue(),
+                awayRosterOffenseValue = game.teamRosters.AwayOffensePlayers.GetRosterPlayersValue(),
+                awayRosterGoalieValue = game.teamRosters.AwayGoalies.GetRosterPlayersValue(),
             };
             return cleanedGame;
         }

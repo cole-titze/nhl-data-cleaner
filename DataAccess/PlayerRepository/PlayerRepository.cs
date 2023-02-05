@@ -30,20 +30,20 @@ namespace DataAccess.PlayerRepository
                 if(player.teamId == game.homeTeamId)
                 {
                     if (playerValue.position == "D")
-                        roster.homeDefensePlayers.Add(playerValue);
+                        roster.HomeDefensePlayers.Add(playerValue);
                     else if (playerValue.position == "G")
-                        roster.homeGoalies.Add(playerValue);
+                        roster.HomeGoalies.Add(playerValue);
                     else
-                        roster.homeOffensePlayers.Add(playerValue);
+                        roster.HomeOffensePlayers.Add(playerValue);
                 }
                 else
                 {
                     if (playerValue.position == "D")
-                        roster.awayDefensePlayers.Add(playerValue);
+                        roster.AwayDefensePlayers.Add(playerValue);
                     else if (playerValue.position == "G")
-                        roster.awayGoalies.Add(playerValue);
+                        roster.AwayGoalies.Add(playerValue);
                     else
-                        roster.awayOffensePlayers.Add(playerValue);
+                        roster.AwayOffensePlayers.Add(playerValue);
                 }
             }
             return roster;
