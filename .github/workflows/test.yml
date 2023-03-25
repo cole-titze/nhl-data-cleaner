@@ -59,6 +59,8 @@ jobs:
         run: |
           ${{ env.GET_COLOR }}
           total=$(cat businesslogicCoverage.xml | grep -oP 'package name="BusinessLogic" line-rate="\K[^"]+')
+          echo $total
+          cat businesslogicCoverage.xml
           total=$(echo "scale=0; $total*100/1" | bc)
           getColor $total > COLOR
           curl "https://img.shields.io/badge/Business%20Logic%20Test%20Coverage-$total%25-$COLOR" > ./badges/nhlDataCleanerBusinessLogicBadge.svg

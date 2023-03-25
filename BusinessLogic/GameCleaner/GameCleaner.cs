@@ -31,14 +31,12 @@ namespace BusinessLogic.GameCleaner
 		{
             for (int seasonStartYear = seasonYearRange.StartYear; seasonStartYear <= seasonYearRange.EndYear; seasonStartYear++)
             {
-                // Add games to Predicted Game?
-
                 var games = await _gameRepo.GetSeasonGames(seasonStartYear);
                 var existingCleanedGames = await _cleanedGameRepo.GetSeasonOfCleanedGames(seasonStartYear);
 
                 var gamesToClean = GetGamesToClean(existingCleanedGames, games);
 
-                if (gamesToClean.Count() == 0)
+                if (!gamesToClean.Any())
                 {
                     _logger.LogInformation("All game data for season " + seasonStartYear.ToString() + " already exists. Skipping...");
                     continue;

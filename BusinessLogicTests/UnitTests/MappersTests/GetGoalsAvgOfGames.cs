@@ -7,7 +7,7 @@ namespace BusinessLogicTests.UnitTests.MappersTests
     [TestClass]
     public class GetGoalsAvgOfGames
     {
-        public static IEnumerable<Game> WinRatioGameFactory(int homeGameCount, int awayGameCount, int homeGameGoalCount, int awayGameGoalCount, int teamId)
+        public static IEnumerable<Game> GoalsGameFactory(int homeGameCount, int awayGameCount, int homeGameGoalCount, int awayGameGoalCount, int teamId)
         {
             int otherTeamId = 2;
             var games = new List<Game>();
@@ -49,12 +49,12 @@ namespace BusinessLogicTests.UnitTests.MappersTests
             int homeGameGoalCount = 0;
             int awayGameGoalCount = 0;
             int teamId = 8;
-            IEnumerable<Game> teamSeasonGames = WinRatioGameFactory(homeGameCount, awayGameCount, homeGameGoalCount, awayGameGoalCount, teamId);
+            IEnumerable<Game> teamSeasonGames = GoalsGameFactory(homeGameCount, awayGameCount, homeGameGoalCount, awayGameGoalCount, teamId);
             double expectedGoalAvg = 0;
 
-            var winRatio = MapGameToDbCleanedGame.GetWinRatioOfGames(teamSeasonGames, teamId);
+            var goalAvg = MapGameToDbCleanedGame.GetGoalsAvgOfGames(teamSeasonGames, teamId);
 
-            winRatio.Should().Be(expectedGoalAvg);
+            goalAvg.Should().Be(expectedGoalAvg);
         }
         [TestMethod]
         public void CallToGetGoalsAvgOfGames_WithTenGamesAndTwentyGoals_ShouldReturnTwo()
@@ -64,27 +64,42 @@ namespace BusinessLogicTests.UnitTests.MappersTests
             int homeGameGoalCount = 9;
             int awayGameGoalCount = 11;
             int teamId = 8;
-            IEnumerable<Game> teamSeasonGames = WinRatioGameFactory(homeGameCount, awayGameCount, homeGameGoalCount, awayGameGoalCount, teamId);
+            IEnumerable<Game> teamSeasonGames = GoalsGameFactory(homeGameCount, awayGameCount, homeGameGoalCount, awayGameGoalCount, teamId);
             double expectedGoalAvg = 2;
 
-            var winRatio = MapGameToDbCleanedGame.GetGoalsAvgOfGames(teamSeasonGames, teamId);
+            var goalAvg = MapGameToDbCleanedGame.GetGoalsAvgOfGames(teamSeasonGames, teamId);
 
-            winRatio.Should().Be(expectedGoalAvg);
+            goalAvg.Should().Be(expectedGoalAvg);
+        }
+        [TestMethod]
+        public void CallToGetGoalsAvgOfGames_WithTenGamesAndFiveGoals_ShouldReturnPointFive()
+        {
+            int homeGameCount = 7;
+            int awayGameCount = 3;
+            int homeGameGoalCount = 3;
+            int awayGameGoalCount = 2;
+            int teamId = 8;
+            IEnumerable<Game> teamSeasonGames = GoalsGameFactory(homeGameCount, awayGameCount, homeGameGoalCount, awayGameGoalCount, teamId);
+            double expectedGoalAvg = .5;
+
+            var goalAvg = MapGameToDbCleanedGame.GetGoalsAvgOfGames(teamSeasonGames, teamId);
+
+            goalAvg.Should().Be(expectedGoalAvg);
         }
         [TestMethod]
         public void CallToGetGoalsAvgOfGames_WithTenGamesAndZeroGoals_ShouldReturnZero()
         {
             int homeGameCount = 3;
             int awayGameCount = 7;
-            int homeGameGoalCount = 9;
-            int awayGameGoalCount = 11;
+            int homeGameGoalCount = 0;
+            int awayGameGoalCount = 0;
             int teamId = 8;
-            IEnumerable<Game> teamSeasonGames = WinRatioGameFactory(homeGameCount, awayGameCount, homeGameGoalCount, awayGameGoalCount, teamId);
-            double expectedGoalAvg = 2;
+            IEnumerable<Game> teamSeasonGames = GoalsGameFactory(homeGameCount, awayGameCount, homeGameGoalCount, awayGameGoalCount, teamId);
+            double expectedGoalAvg = 0;
 
-            var winRatio = MapGameToDbCleanedGame.GetGoalsAvgOfGames(teamSeasonGames, teamId);
+            var goalAvg = MapGameToDbCleanedGame.GetGoalsAvgOfGames(teamSeasonGames, teamId);
 
-            winRatio.Should().Be(expectedGoalAvg);
+            goalAvg.Should().Be(expectedGoalAvg);
         }
     }
 }
