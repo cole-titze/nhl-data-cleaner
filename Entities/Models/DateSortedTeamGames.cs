@@ -1,9 +1,8 @@
-﻿using System;
-using Entities.DbModels;
+﻿using Entities.DbModels;
 
 namespace Entities.Models
 {
-	public class DateSortedTeamGames
+    public class DateSortedTeamGames
 	{
         public int TeamId { get; set; }
 		public readonly IEnumerable<Game> HomeGames;

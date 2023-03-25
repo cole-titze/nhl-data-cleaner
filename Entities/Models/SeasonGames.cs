@@ -1,7 +1,6 @@
-﻿using System;
-namespace Entities.Models
+﻿namespace Entities.Models
 {
-	public class SeasonGames
+    public class SeasonGames
 	{
 		public readonly IDictionary<int, DateSortedTeamGames> GamesMap = new Dictionary<int, DateSortedTeamGames>();
 		public SeasonGames(IEnumerable<Game> games)
