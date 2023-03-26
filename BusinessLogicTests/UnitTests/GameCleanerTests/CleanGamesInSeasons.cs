@@ -1,6 +1,4 @@
-﻿using BusinessLogic.Mappers;
-using Entities.Models;
-using FluentAssertions;
+﻿using Entities.Models;
 using FakeItEasy;
 using DataAccess.PlayerRepository;
 using DataAccess.GameRepository;
@@ -9,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using BusinessLogic.GameCleaner;
 using Entities.DbModels;
 using Entities.Types;
-using System.Runtime.CompilerServices;
 
 namespace BusinessLogicTests.UnitTests.GameCleanerTests
 {

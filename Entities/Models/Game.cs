@@ -34,15 +34,6 @@ namespace Entities.Models
         public bool hasBeenPlayed { get; set; }
 
         public GameRoster teamRosters { get; set; } = new GameRoster();
-
-        /// <summary>
-        /// Gets whether a game is valid or not
-        /// </summary>
-        /// <returns>True if both teams won 0 faceoffs</returns>
-        public bool IsValid()
-        {
-            return homeFaceOffWinPercent != 0 || awayFaceOffWinPercent != 0;
-        }
         /// <summary>
         /// Gets if the team won or not
         /// </summary>
