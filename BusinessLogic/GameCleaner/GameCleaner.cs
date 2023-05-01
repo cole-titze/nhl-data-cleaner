@@ -32,9 +32,11 @@ namespace BusinessLogic.GameCleaner
             for (int seasonStartYear = seasonYearRange.StartYear; seasonStartYear <= seasonYearRange.EndYear; seasonStartYear++)
             {
                 var games = await _gameRepo.GetSeasonGames(seasonStartYear);
+                var gamesToClean = games;
                 var existingCleanedGames = await _cleanedGameRepo.GetSeasonOfCleanedGames(seasonStartYear);
 
-                var gamesToClean = GetGamesToClean(existingCleanedGames, games);
+                if(seasonStartYear != seasonYearRange.EndYear)
+                    gamesToClean = GetGamesToClean(existingCleanedGames, games);
 
                 if (!gamesToClean.Any())
                 {
