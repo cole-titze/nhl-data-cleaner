@@ -1,5 +1,6 @@
 ![GitHub](https://img.shields.io/github/license/cole-titze/nhl-data-cleaner?color=brightgreen)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/cole-titze/nhl-data-cleaner?label=Release)
+![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/cole-titze/nhl-data-cleaner?label=Dependencies)
 \
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/cole-titze/nhl-data-cleaner/build.yml?label=Build)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/cole-titze/nhl-data-cleaner/test.yml?label=Tests)
