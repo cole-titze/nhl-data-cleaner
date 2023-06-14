@@ -1,10 +1,10 @@
-![GitHub](https://img.shields.io/github/license/cole-titze/nhl-data-cleaner?color=brightgreen)
-![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/cole-titze/nhl-data-cleaner?label=Release)
+[![GitHub](https://img.shields.io/github/license/cole-titze/nhl-data-cleaner?color=brightgreen)](https://github.com/cole-titze/nhl-data-cleaner/blob/main/LICENSE.md)
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/cole-titze/nhl-data-cleaner?label=Release)](https://github.com/cole-titze/nhl-data-cleaner/releases)
 \
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/cole-titze/nhl-data-cleaner/build.yml?label=Build)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/cole-titze/nhl-data-cleaner/test.yml?label=Tests)
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/cole-titze/nhl-data-cleaner/docker-publish.yml?label=Docker%20Publish)
-![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/cole-titze/nhl-data-cleaner?label=Dependencies)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/cole-titze/nhl-data-cleaner/build.yml?label=Build)](https://github.com/cole-titze/nhl-data-cleaner/actions/workflows/build.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/cole-titze/nhl-data-cleaner/test.yml?label=Tests)](https://github.com/cole-titze/nhl-data-cleaner/actions/workflows/test.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/cole-titze/nhl-data-cleaner/docker-publish.yml?label=Docker%20Publish)](https://github.com/cole-titze/nhl-data-cleaner/actions/workflows/docker-publish.yml)
+[![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/cole-titze/nhl-data-cleaner?label=Dependencies)](https://libraries.io/github/cole-titze/nhl-data-cleaner)
 \
 ![cod cov](https://nhlblobstorage.blob.core.windows.net/repobadges/nhlDataCleanerBusinessLogicBadge.svg)
 ![cod cov](https://nhlblobstorage.blob.core.windows.net/repobadges/nhlDataCleanerEntitiesBadge.svg)
