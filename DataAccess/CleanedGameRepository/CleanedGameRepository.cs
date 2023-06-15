@@ -23,8 +23,11 @@ namespace DataAccess.CleanedGameRepository
             foreach (var game in cleanedGames)
             {
                 var dbGame = _cachedSeasonsGames.FirstOrDefault(x => x.gameId == game.gameId);
+                game.game = null;
                 if (dbGame == null)
+                {
                     addList.Add(game);
+                }
                 else
                 {
                     dbGame.Clone(game);
